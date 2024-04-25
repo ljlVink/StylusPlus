@@ -7,8 +7,8 @@ android {
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.ljlvink.legacyxpmodule"
-        minSdk 33
+        applicationId "com.ljlvink.stylusplus.xposed"
+        minSdk 34
         targetSdk 34
         versionCode 1
         versionName "1.0"
@@ -27,5 +27,5 @@ android {
 }
 
 dependencies {
-    compileOnly files('libs\\XposedBridgeApi-89.jar')
+    compileOnly files('libs/XposedBridgeAPI-89.jar')
 }

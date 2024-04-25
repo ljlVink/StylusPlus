@@ -1,5 +1,5 @@
 <resources>
     <string-array name="xposed_scope">
-        <item>com.ljlvink.packagename</item>
+        <item>android</item>
     </string-array>
 </resources>

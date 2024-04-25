@@ -14,11 +14,10 @@
             android:resource="@array/xposed_scope" />
         <meta-data
             android:name="xposeddescription"
-            android:value="put your description here." />
+            android:value="HyperOS for Pad 焦点笔激光 隔空鼠标" />
         <meta-data
             android:name="xposedminversion"
             android:value="89" />
-
     </application>
 
 </manifest>
