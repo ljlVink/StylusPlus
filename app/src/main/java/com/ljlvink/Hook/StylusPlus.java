@@ -1,12 +1,8 @@
 package com.ljlvink.Hook;
 
-import android.graphics.Path;
 import android.graphics.PointF;
-
 import com.ljlvink.utils.logutil;
-
 import java.util.ArrayList;
-import java.util.List;
 
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
@@ -24,7 +20,7 @@ public class StylusPlus {
     public boolean isInCtrlMode;
 
     public void setInCtrlMode(boolean inCtrlMode) {
-        if(inCtrlMode==false){
+        if(!inCtrlMode){
             last_point=new PointF();
         }
         isInCtrlMode = inCtrlMode;
@@ -42,9 +38,7 @@ public class StylusPlus {
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 super.afterHookedMethod(param);
                 PointF pos=(PointF) param.args[0];
-                //清除轨迹，防止轨迹生成，因为后面的代码不能阻止运行，要提前清理轨迹
-                List<Path> emptyList = new ArrayList<>();
-                XposedHelpers.setObjectField(param.thisObject,"mPathList" ,emptyList);
+                XposedHelpers.setObjectField(param.thisObject,"mPathList" ,new ArrayList<>());//清除轨迹，防止轨迹生成，因为后面的代码不能阻止运行，要提前清理轨迹
                 last_point=pos;
                 if(!isKeepPath||!isDrawMode){
                     return; //激光模式 或者为笔迹模式但不记录笔迹的模式
@@ -82,12 +76,10 @@ public class StylusPlus {
                 super.beforeHookedMethod(param);
                 int count =(int)param.args[0];
                 logutil.log("Short click Detected! count ="+count);
-                if(count==2){
-                    if(isInCtrlMode){
-                        //两次短按，退出控制模式，清除掉笔的画面
-                        setInCtrlMode(false);
-                        XposedHelpers.callMethod(param.thisObject,"fadeLocked",0);
-                    }
+                if(count==2&&isInCtrlMode){
+                    //两次短按，退出控制模式，清除掉笔的画面
+                    setInCtrlMode(false);
+                    XposedHelpers.callMethod(param.thisObject,"fadeLocked",0);
                 }
                 //一次短按，判断最后一个点的合法性发送单击事件
                 if(isDrawMode&&checkPointerVaild(last_point)){
