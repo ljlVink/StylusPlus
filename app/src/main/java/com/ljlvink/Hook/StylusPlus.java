@@ -33,7 +33,15 @@ public class StylusPlus {
         //加载输入
         Class<?>inputSC=XposedHelpers.findClass("com.android.server.input.InputShellCommand",classLoader);
         Object InputShellCommand = inputSC.newInstance();
-        XposedHelpers.findAndHookMethod("com.miui.server.input.laser.LaserView", classLoader, "setPosition", android.graphics.PointF.class, new XC_MethodHook() {
+        String stylus="stylus.";
+        try{
+            XposedHelpers.findClass("com.miui.server.input.stylus.laser.LaserView",classLoader);
+            logutil.log("use com.miui.server.input.stylus.laser.LaserView"); //server.input.stylus (xiaomi Pad 6S Pro)
+        }catch (XposedHelpers.ClassNotFoundError e){
+            stylus="";
+            logutil.log("use com.miui.server.input.laser.LaserView"); //input.stylus (xiaomi Pad 6 Max)
+        }
+        XposedHelpers.findAndHookMethod("com.miui.server.input."+stylus+"laser.LaserView", classLoader, "setPosition", android.graphics.PointF.class, new XC_MethodHook() {
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 super.afterHookedMethod(param);
@@ -55,7 +63,8 @@ public class StylusPlus {
                 }
             }
         });
-        XposedHelpers.findAndHookMethod("com.miui.server.input.laser.LaserView", classLoader, "setKeepPath", boolean.class, new XC_MethodHook() {
+        XposedHelpers.findAndHookMethod("com.miui.server.input."+stylus+"laser.LaserView", classLoader, "setKeepPath", boolean.class, new XC_MethodHook() {
+
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 super.beforeHookedMethod(param);
@@ -63,19 +72,18 @@ public class StylusPlus {
             }
         });
         //截取长按操作 onLaserKeyLongPressed
-        XposedHelpers.findAndHookMethod("com.miui.server.input.laser.LaserView", classLoader, "setMode", int.class, new XC_MethodHook() {
+        XposedHelpers.findAndHookMethod("com.miui.server.input."+stylus+"laser.LaserView", classLoader, "setMode", int.class, new XC_MethodHook() {
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 super.beforeHookedMethod(param);
                 isDrawMode=((int)param.args[0]==1); //mode==1 设置模式：激光模式为0，画笔模式为1(画笔模式改为输入控制模式)
             }
         });
-        XposedHelpers.findAndHookMethod("com.miui.server.input.laser.LaserPointerController", classLoader, "onLaserKeyPressed",int.class, new XC_MethodHook() {
+        XposedHelpers.findAndHookMethod("com.miui.server.input."+stylus+"laser.LaserPointerController", classLoader, "onLaserKeyPressed",int.class, new XC_MethodHook() {
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 super.beforeHookedMethod(param);
                 int count =(int)param.args[0];
-                logutil.log("Short click Detected! count ="+count);
                 if(count==2&&isInCtrlMode){
                     //两次短按，退出控制模式，清除掉笔的画面
                     setInCtrlMode(false);
@@ -90,11 +98,10 @@ public class StylusPlus {
                 }
             }
         });
-        XposedHelpers.findAndHookMethod("com.miui.server.input.laser.LaserPointerController", classLoader, "interceptLaserKeyUp", new XC_MethodHook() {
+        XposedHelpers.findAndHookMethod("com.miui.server.input."+stylus+"laser.LaserPointerController", classLoader, "interceptLaserKeyUp", new XC_MethodHook() {
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 super.beforeHookedMethod(param);
-                logutil.log("laser key up from keyevent"); //已经抬笔
                 //判断是否可见
                 Object state=XposedHelpers.getObjectField(param.thisObject,"mLaserState");
                 boolean isVisible =XposedHelpers.getBooleanField(state,"mVisible");

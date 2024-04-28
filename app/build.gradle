@@ -10,8 +10,8 @@ android {
         applicationId "com.ljlvink.stylusplus.xposed"
         minSdk 34
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "1.1_Release"
     }
 
     buildTypes {
